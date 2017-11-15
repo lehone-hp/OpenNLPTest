@@ -6,33 +6,49 @@ import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.Span;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 
 public class MainClass {
 
     public static void main(String[] args) throws Exception{
 
-        InputStream tokenizerInputStream = new FileInputStream("/home/lehone/repos/OpenNLPExample/src/main/resources/en-token.bin");
+
+        FileReader reader = new FileReader(new File("src/main/resources/organization_text.txt"));
+        FileWriter writer = new FileWriter(new File("src/main/resources/output.txt"));
+
+        BufferedReader br = new BufferedReader(reader);
+        BufferedWriter bw = new BufferedWriter(writer);
+
+        String line = "";
+
+        InputStream tokenizerInputStream = new FileInputStream("src/main/resources/en-token.bin");
         TokenizerModel tokenModel = new TokenizerModel(tokenizerInputStream);
-
         TokenizerME tokenizer = new TokenizerME(tokenModel);
-        String sentence = "Kranite Nigeria Limited commits itself to becoming an international company and a. ";
 
-        String[] tokens = tokenizer.tokenize(sentence);
-
-
-        InputStream inputStream = new FileInputStream("/home/lehone/repos/OpenNLPExample/src/main/resources/en-ner-organization.bin");
+        InputStream inputStream = new FileInputStream("src/main/resources/en-ner-organization.bin");
         TokenNameFinderModel model = new TokenNameFinderModel(inputStream);
-
         NameFinderME nameFinder = new NameFinderME(model);
-        Span[] nameSpans = nameFinder.find(tokens);
 
-        for(Span s: nameSpans){
-            for (int i=s.getStart(); i<s.getEnd(); i++){
-                System.out.print(tokens[i]+" ");
+        while ((line=br.readLine()) != null) {
+
+            String[] tokens = tokenizer.tokenize(line);
+            Span[] nameSpans = nameFinder.find(tokens);
+
+            bw.write(line+"\n");
+
+            for(Span s: nameSpans){
+
+                bw.write("\t\t");
+
+                for (int i=s.getStart(); i<s.getEnd(); i++){
+                    bw.write(tokens[i]+" ");
+                }
+
+                bw.write("\n");
             }
-            System.out.println();
+            bw.write("\n\n");
+            bw.flush();
         }
+
     }
 }

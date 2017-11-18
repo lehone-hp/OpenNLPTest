@@ -1,12 +1,11 @@
 package dev.hope;
 
-import opennlp.tools.namefind.NameFinderME;
-import opennlp.tools.namefind.TokenNameFinderModel;
+import opennlp.tools.namefind.*;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.sentdetect.SentenceModel;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
-import opennlp.tools.util.Span;
+import opennlp.tools.util.*;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -14,11 +13,32 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 public class MainClass {
 
     public static void main(String[] args) throws Exception{
+        /**
+        FileReader reader = new FileReader(new File("src/main/resources/training-org.txt"));
+        FileWriter writer = new FileWriter(new File("src/main/resources/training-org2.txt"));
 
+        BufferedReader br = new BufferedReader(reader);
+        BufferedWriter bw = new BufferedWriter(writer);
+
+        String line;
+        String replace;
+
+        while ((line=br.readLine()) != null){
+            replace = line.replaceAll("<START:organization>", "<START:organization> ");
+            line = replace;
+            replace = line.replaceAll("<END>", " <END>");
+            System.out.println("Processed - "+replace);
+
+            bw.write(replace+"\n");
+        }
+        */
 
         /**
          * Connect to solr and get all jobs from this JobSite
@@ -68,6 +88,35 @@ public class MainClass {
 
          */
 
+
+        /**
+         * Training
+
+
+
+        try  {
+            ObjectStream<String> lineStream =
+                    new PlainTextByLineStream(new InputStreamFactory() {
+                        @Override
+                        public InputStream createInputStream() throws IOException {
+                            return new FileInputStream("src/main/resources/training-org.txt");
+                        }
+                    } , StandardCharsets.UTF_8);
+
+            TokenNameFinderModel model;
+
+            ObjectStream<NameSample> sampleStream = new NameSampleDataStream(lineStream);
+            model = NameFinderME.train("en", "organization", sampleStream, TrainingParameters.defaultParams(),
+                    new TokenNameFinderFactory());
+
+            BufferedOutputStream modelOut = new BufferedOutputStream(new FileOutputStream("src/main/resources/en-ner-organization"));
+            model.serialize(modelOut);
+        } catch (Exception e) {
+            System.err.println(e);
+            e.printStackTrace();
+        }
+
+
         FileReader reader = new FileReader(new File("src/main/resources/organization_text.txt"));
         FileWriter writer = new FileWriter(new File("src/main/resources/output.txt"));
 
@@ -80,7 +129,7 @@ public class MainClass {
         TokenizerModel tokenModel = new TokenizerModel(tokenizerInputStream);
         TokenizerME tokenizer = new TokenizerME(tokenModel);
 
-        InputStream inputStream = new FileInputStream("src/main/resources/en-ner-organization.bin");
+        InputStream inputStream = new FileInputStream("src/main/resources/en-ner-organization0.bin");
         TokenNameFinderModel model = new TokenNameFinderModel(inputStream);
         NameFinderME nameFinder = new NameFinderME(model);
 
@@ -104,6 +153,6 @@ public class MainClass {
             bw.write("\n\n");
             bw.flush();
         }
-
+         */
     }
 }
